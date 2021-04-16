@@ -86,7 +86,6 @@ class FaceMask:
         img = cv.resize(img, self.size)
         img_pil = Image.fromarray(img)
 
-        result = ""
         result = self.TFpredictPilImg(img_pil)
         return result
 
@@ -94,11 +93,23 @@ class FaceMask:
 
     def DetectFaceInFrame(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        gray = cv2.equalizeHist(gray)
-        rects = self.cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3, flags=cv2.CASCADE_SCALE_IMAGE)
+        #gray = cv2.equalizeHist(gray)
+
+        newWidth = int(gray.shape[1] /2)
+        newHeight = int(gray.shape[0] /2)
+
+        gray = cv2.resize(gray, (newWidth, newHeight))
+        rects = self.cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3, flags=cv2.CASCADE_SCALE_IMAGE, minSize=(20,20))
 
         if(len(rects) > 0):
             rects[:,2:] += rects[:,:2]
+
+        for r in rects:
+            r[0] *= 2
+            r[1] *= 2
+            r[2] *= 2
+            r[3] *= 2
+            
 
         return rects
 
